@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "genaiatwork"
+version = "0.1.0"
+description = "Private productivity-focused AI workspace crafted for daily use, characterized by simplicity, minimalism, and effortlessly integrated multilingual communication assistance catering to professionals' needs."
+authors = ["minyang chen <mychen76@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "genai_at_work"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^1.12.0"
+gradio = "^4.19.1"
+ollama = "^0.1.6"
+tiktoken = "^0.6.0"
+html2text = "^2020.1.16"
+selenium = "^4.18.1"
+newspaper3k = "^0.2.8"
+textstat = "^0.7.3"
+duckduckgo-search = "^4.4.3"
+transformers = "^4.37.2"
+torch = {version = "2.1.0+cu121", source = "torch"}
+torchaudio = {version = "2.1.0+cu121", source = "torch"}
+torchvision = {version = "0.16.0+cu121", source = "torch"}
+faster-whisper = "^0.10.0"
+pytube = "^15.0.0"
+pydub = "^0.25.1"
+accelerate = "^0.27.2"
+optimum = "^1.17.1"
+chromadb = "^0.4.22"
+markdown = "^3.5.2"
+docx2txt = "^0.8"
+bs4 = "^0.0.2"
+pymupdf = "^1.23.24"
+loguru = "^0.7.2"
+async-timeout = "^4.0.3"
+huggingface-hub = "^0.20.3"
+sentence-transformers = "^2.3.1"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.1"
+black = "^24.2.0"
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "supplemental"
+
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

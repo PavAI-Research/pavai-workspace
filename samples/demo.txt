@@ -1,0 +1,20 @@
+1. select assistant mode: EcoWarriorGPT 
+2. speech and writing style: Casual
+
+3. select a data source: web-search type in: eco friendly trend in 2024
+
+4. user typing: cool, please summarize it
+
+5. user type: what can I do to help? 
+
+6. user upload a picture of plastics:
+
+7. user pick a youtube video: 
+   title: Why Can’t We Scoop All the Plastic Out of the Ocean?
+   link: https://www.youtube.com/watch?v=1GVO8dOt_lc
+
+
+
+
+
+
