@@ -781,7 +781,26 @@ class SeamlessWorkspace:
                                         value=0, visible=False, precision=0
                                     )
 
+                    with gr.Accordion("Scratch Pad", open=False):
+                        box_notepad=gr.TextArea(lines=7,label="Notes", info="write single page quick notes.", interactive=True)                    
+                        with gr.Row():
+                            with gr.Column(scale=3):
+                                btn_save_notepad=gr.Button(size="sm",value="save and update")
+                            with gr.Column(scale=1):                            
+                                btn_load_notepad=gr.Button(size="sm",value="load")                    
+                        ## function: scratch pad
+                        def save_notespad(text_notes):
+                            gr.Info("saved notes to notepad.txt!")
+                            return filedata.save_text_file("notepad.txt",text_notes)
+                        def load_notespad(filename:str="notepad.txt"):
+                            gr.Info("load notes")                    
+                            return filedata.get_text_file(filename)
+
+                        btn_save_notepad.click(fn=save_notespad, inputs=[box_notepad])
+                        btn_load_notepad.click(fn=load_notespad, outputs=[box_notepad])                
+
                     ## update expert mode and speech style
+                    ## in-line update event handler                        
                     expert_mode.change(
                         fn=self.update_expert_model,
                         inputs=[expert_mode, system_prompt, speech_style],
