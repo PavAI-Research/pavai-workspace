@@ -1,2 +1,2 @@
 # GenAI-At-Work
-Seamless productivity focus AI workspace catering to professionals' needs. 
+Private Seamless productivity focus AI workspace crafted for daily use, characterized by simplicity, minimalism, and effortlessly integrated multilingual communication assistance catering to professionals' needs. 
