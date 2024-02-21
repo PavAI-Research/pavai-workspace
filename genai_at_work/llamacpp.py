@@ -16,47 +16,55 @@ from rich import pretty
 pretty.install()
 
 print("MULTIMODAL")
-HF_CACHE_DIR="./models"
-model_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
-project_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
-print(model_file)
-print(project_file)
+def download_models():
+    HF_CACHE_DIR=config["HF_CACHE_DIR"]
+    model_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
+    project_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
+    print(model_file)
+    print(project_file)
+    return model_file, project_file
 
-chat_handler = Llava15ChatHandler(clip_model_path=project_file)
+def load_llm(model_file,project_file):
+    chat_handler = Llava15ChatHandler(clip_model_path=project_file)
+    llm = Llama(
+        model_path=model_file,
+        chat_handler=chat_handler,
+        n_ctx=4096, # n_ctx should be increased to accomodate the image embedding
+        logits_all=True,# needed to make llava work
+        n_gpu_layers=-1,
+        n_threads=8
+    )
 
-llm = Llama(
-    model_path=model_file,
-    chat_handler=chat_handler,
-    n_ctx=4096, # n_ctx should be increased to accomodate the image embedding
-    logits_all=True,# needed to make llava work
-    n_gpu_layers=-1,
-    n_threads=8
-)
-
-# def chat():
-#     llm.create_chat_completion(
-#       messages = [
-#           {"role": "system", "content": "You are an assistant who perfectly describes images."},
-#           {
-#               "role": "user",
-#               "content": "Describe this image in detail please."
-#           }
-#       ]
-#     )
-
-#def mmchat():
-result=llm.create_chat_completion(
-messages = [
-    {"role": "system", "content": "You are an assistant who perfectly describes images."},
-    {
-        "role": "user",
-        "content": [
-            {"type": "image_url", "image_url": {"url": "file:///home/pop/software_engineer/chatbotatwork/samples/Bill_Image_Receipt.png"}},
-            {"type" : "text", "text": "Describe this image in detail please."}
+def chat(user_prompt:str, system_prompt:str):
+    model_file, project_file = download_models()
+    llm = load_llm(model_file, project_file)
+    result = llm.create_chat_completion(
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": user_prompt
+            }
         ]
-    }
-]
-)
+    )
+    return result
+
+def mmchat(user_prompt:str,image_url:str,system_prompt:str):
+    model_file, project_file = download_models()
+    llm = load_llm(model_file, project_file)    
+    ## "file:///home/pop/software_engineer/chatbotatwork/samples/Bill_Image_Receipt.png"
+    result= llm.create_chat_completion(
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": image_url}},
+                {"type" : "text", "text": user_prompt}
+                ]
+            }
+        ])
+    return result 
 
 # print(result)
 
@@ -102,4 +110,3 @@ messages = [
 # },
 # #temperature=0.7
 # #)
-

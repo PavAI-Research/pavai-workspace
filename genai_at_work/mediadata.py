@@ -5,7 +5,16 @@
 # !pip install -q git+https://github.com/huggingface/transformers
 # !pip install -q accelerate optimum
 # pip install pytube
-
+import os 
+from dotenv import dotenv_values
+config = {
+    **dotenv_values("env.shared"),  # load shared development variables
+    **dotenv_values("env.secret"),  # load sensitive variables
+    **os.environ,  # override loaded values with environment variables
+}
+import os
+import time 
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import torch
 
 def distil_whisper(filepath:str,chatbot:list=[],history:list=[], 
@@ -14,9 +23,7 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
                      temperature:float=0.2,
                      do_sample:bool=True,
                      low_cpu_mem_usage:bool=False):
-    import os
-    import time 
-    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
     if device is None:
         device = "cuda:0" if torch.cuda.is_available() else "cpu"
     torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
@@ -30,10 +37,11 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
             low_cpu_mem_usage=low_cpu_mem_usage, 
             use_safetensors=True,
             temperature=temperature,
-            do_sample=do_sample
+            do_sample=do_sample,
+            cache_dir=config["HF_CACHE_DIR"]
         )
         model.to(device)
-        processor = AutoProcessor.from_pretrained(model_id)
+        processor = AutoProcessor.from_pretrained(model_id, cache_dir=config["HF_CACHE_DIR"])
         pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -100,7 +108,7 @@ def faster_whisper(filepath:str,chatbot:list=[],history:list=[],
     cpu_count = int(os.cpu_count()/2)
     result=[]    
     try:
-        model = WhisperModel(model_size_or_path=model_id, device=device, cpu_threads=cpu_count)
+        model = WhisperModel(model_size_or_path=model_id, device=device, cpu_threads=cpu_count, download_root=config["HF_CACHE_DIR"])
         segments, info = model.transcribe(filepath, task = task, beam_size=beam_size,vad_filter=True)        
         print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
         for segment in segments:

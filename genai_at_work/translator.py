@@ -1,5 +1,12 @@
 ## m4s seamless communication
 import gradio as gr
+import os
+from dotenv import dotenv_values
+config = {
+    **dotenv_values("env.shared"),  # load shared development variables
+    **dotenv_values("env.secret"),  # load sensitive variables
+    **os.environ,  # override loaded values with environment variables
+}
 
 import numpy as np
 import torch
@@ -23,7 +30,7 @@ SPEAKER_ID = 7
 
 AUDIO_SAMPLE_RATE = 16000.0
 MAX_INPUT_AUDIO_LENGTH = 360  # in seconds
-DEFAULT_TARGET_LANGUAGE = "French"
+DEFAULT_TARGET_LANGUAGE = config["DEFAULT_TRANSLATION_LANG"]
 
 # device = "cuda:0" if torch.cuda.is_available() else "cpu"
 # device = "cpu"
@@ -35,8 +42,12 @@ def load_model(mode_name_or_path:str="facebook/seamless-m4t-v2-large", device:st
     global processorv2
 
     gr.Info("Getting translation model...")
-    processorv2 = AutoProcessor.from_pretrained(mode_name_or_path)
-    modelv2 = SeamlessM4Tv2ForSpeechToSpeech.from_pretrained(mode_name_or_path)
+    processorv2 = AutoProcessor.from_pretrained(
+        pretrained_model_name_or_path=mode_name_or_path,
+        cache_dir=config["HF_CACHE_DIR"])
+    modelv2 = SeamlessM4Tv2ForSpeechToSpeech.from_pretrained(
+        pretrained_model_name_or_path=mode_name_or_path,
+        cache_dir=config["HF_CACHE_DIR"])
     modelv2 = modelv2.to(device)
     return modelv2, processorv2
 
