@@ -29,7 +29,7 @@ pretty.install()
 #API_HOST = "http://192.168.0.29:8004"
 LLM_PROVIDER=config["LLM_PROVIDER"]
 
-API_HOST=config["API_HOST"]
+API_HOST=config["LLAMACPP_API_HOST"]
 API_URL_BASE = f"{API_HOST}/v1"
 API_URL_CHAT = f"{API_URL_BASE}/chat/completions"
 

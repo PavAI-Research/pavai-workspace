@@ -19,9 +19,9 @@ newspaper3k = "^0.2.8"
 textstat = "^0.7.3"
 duckduckgo-search = "^4.4.3"
 transformers = "^4.37.2"
-torch = {version = "2.1.0+cu121", source = "torch"}
-torchaudio = {version = "2.1.0+cu121", source = "torch"}
-torchvision = {version = "0.16.0+cu121", source = "torch"}
+torch = {version = "^2.1.2+cu118", source = "pytorch"}
+torchvision = {version = "^0.16.2+cu118", source = "pytorch"}
+torchaudio = {version = "^2.1.2+cu118", source = "pytorch"}
 faster-whisper = "^0.10.0"
 pytube = "^15.0.0"
 pydub = "^0.25.1"
@@ -37,15 +37,27 @@ async-timeout = "^4.0.3"
 huggingface-hub = "^0.20.3"
 sentence-transformers = "^2.3.1"
 python-dotenv = "^1.0.1"
+llama-cpp-python = "^0.2.32"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.1"
-black = "^24.2.0"
+pytest = "^7.4.4"
+jupyterlab = "^4.0.11"
+black = "^23.12.1"
+faker = "^22.4.0"
+ipykernel = "^6.29.0"
+pylint = "^3.0.3"
+isort = "^5.13.2"
+jupyterlab-code-formatter = "^2.2.1"
 
 [[tool.poetry.source]]
-name = "torch"
-url = "https://download.pytorch.org/whl/cu121"
-priority = "supplemental"
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
+
+# [[tool.poetry.source]]
+# name = "torch"
+# url = "https://download.pytorch.org/whl/cu121"
+# priority = "supplemental"
 
 
 [[tool.poetry.source]]

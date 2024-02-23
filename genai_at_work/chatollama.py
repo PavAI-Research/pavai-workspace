@@ -24,7 +24,7 @@ import tiktoken
 #prompt = "Enter Your Query Here"
 LLM_PROVIDER=config["LLM_PROVIDER"]
 
-API_HOST=config["API_HOST"]
+API_HOST=config["OLLAMA_API_HOST"]
 client = Client(host=API_HOST)
 asclient = AsyncClient(host=API_HOST)
 

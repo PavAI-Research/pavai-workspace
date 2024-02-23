@@ -16,9 +16,15 @@ ggml-metal.metal
 .idea
 test_data
 *.crt
-models
-historydb
-session_logs
+
+resources/models
+resources/historydb
+resources/session_logs
+
+workspace/scratchpad
+workspace/downloads
+workspace/session_logs
+
 downloads
 __pycache__
 

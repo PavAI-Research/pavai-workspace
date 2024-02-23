@@ -1,5 +1,10 @@
+import os
 from dotenv import dotenv_values
-system_config = dotenv_values("env_config")
+config = {
+    **dotenv_values("env.shared"),  # load shared development variables
+    **dotenv_values("env.secret"),  # load sensitive variables
+    **os.environ,  # override loaded values with environment variables
+}
 import logging
 import warnings 
 from rich.logging import RichHandler
@@ -35,7 +40,7 @@ import time
 # pip install docx2txt
 # --pip install pypandoc
 
-_DEFAULT_SYSTEM_DOWNLOADS_PATH="./downloads"
+_DEFAULT_SYSTEM_DOWNLOADS_PATH=config["DOWNLOADS_DIR"]
 #system_config["DEFAULT_SYSTEM_DOWNLOADS_PATH"]
 
 def load_text_file(command_name: str,
@@ -208,7 +213,7 @@ def load_file_content(filepath:str,chatbot:list=[],history:list=[]):
     print(f"load_text_file_content took {took}s")
     return chatbot, history 
 
-def list_session_files(storage_path:str="./session_logs", extensions=".log"):
+def list_session_files(storage_path:str=config["SESSION_LOGS"], extensions=".log"):
     if not os.path.exists(storage_path):
         os.mkdir(storage_path)    
     # list files in current directory only
@@ -239,7 +244,7 @@ def append_json(new_data, filename='data.json'):
         with open(filename,'w+') as file:
             json.dump(lst, file, indent = 4)
 
-def save_session_files(chatbot:list, history:list, filename:str=None, storage_path:str="./session_logs"):
+def save_session_files(chatbot:list, history:list, filename:str=None, storage_path:str=config["SESSION_LOGS"]):
     if not os.path.exists(storage_path):
         os.mkdir(storage_path)    
     if filename is None:
@@ -256,7 +261,7 @@ def save_session_files(chatbot:list, history:list, filename:str=None, storage_pa
     print("saved json file")
     return save_chatbot_file
 
-def delete_session_files(filename:str,storage_path:str="./session_logs" ):
+def delete_session_files(filename:str,storage_path:str=config["SESSION_LOGS"] ):
     if filename is None:
         raise ValueError("nothing to delete, empty filename!")
     filename_txt=storage_path+"/"+filename
@@ -272,7 +277,7 @@ def delete_session_files(filename:str,storage_path:str="./session_logs" ):
     except:
         pass
 
-def load_session_files(filename:str,chatbot:list=[],history:list=[], storage_path:str="./session_logs"):
+def load_session_files(filename:str,chatbot:list=[],history:list=[], storage_path:str=config["SESSION_LOGS"]):
     history=[] if history is None else history
     chatbot=[] if chatbot is None else chatbot
     filename=storage_path+"/"+filename

@@ -12,10 +12,21 @@ config = {
     **dotenv_values("env.secret"),  # load sensitive variables
     **os.environ,  # override loaded values with environment variables
 }
-import os
+import logging
+from rich.logging import RichHandler
+from rich import pretty
+logging.basicConfig(level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)])
+logger = logging.getLogger(__name__)
+pretty.install()
+import warnings 
+warnings.filterwarnings("ignore")
+import traceback
 import time 
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import torch
+
+HF_CACHE_DIR=config["HF_CACHE_DIR"] #"resources/models"
+print("hf_cache_dir: ", HF_CACHE_DIR)
 
 def distil_whisper(filepath:str,chatbot:list=[],history:list=[], 
                      model_id:str= "distil-whisper/distil-large-v2",
@@ -62,7 +73,8 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
                 low_cpu_mem_usage=False, 
                 use_safetensors=True,
                 temperature=temperature,
-                do_sample=do_sample                
+                do_sample=do_sample ,
+                cache_dir=config["HF_CACHE_DIR"]               
             )
             model.to(device)
             processor = AutoProcessor.from_pretrained(model_id)
@@ -73,7 +85,8 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
                 feature_extractor=processor.feature_extractor,
                 max_new_tokens=128,
                 torch_dtype=torch_dtype,
-                device=device
+                device=device,
+                cache_dir=config["HF_CACHE_DIR"]
             )    
             result = pipe(filepath)
     # update chatbot
@@ -97,7 +110,7 @@ def faster_whisper(filepath:str,chatbot:list=[],history:list=[],
                      compute_type:str="default",                     
                      timeline:bool=False, 
                      beam_size:int=6,
-                     download_root:str=None,
+                     download_root:str=config["HF_CACHE_DIR"],
                      local_files_only:bool=False):
     
     from faster_whisper import WhisperModel
@@ -108,9 +121,9 @@ def faster_whisper(filepath:str,chatbot:list=[],history:list=[],
     cpu_count = int(os.cpu_count()/2)
     result=[]    
     try:
-        model = WhisperModel(model_size_or_path=model_id, device=device, cpu_threads=cpu_count, download_root=config["HF_CACHE_DIR"])
+        model = WhisperModel(model_size_or_path=model_id, device=device, cpu_threads=cpu_count, download_root=download_root)
         segments, info = model.transcribe(filepath, task = task, beam_size=beam_size,vad_filter=True)        
-        print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+        logger.info(f"Detected language {info.language} with probability {info.language_probability:.2f}")
         for segment in segments:
             if timeline:
                 result.append(f"[{segment.start:.2f}s -> {segment.end:.2f}s] {segment.text}")
@@ -118,8 +131,10 @@ def faster_whisper(filepath:str,chatbot:list=[],history:list=[],
                 result.append(str(segment.text)+" ")
     except RuntimeError as re:
         print ("runtime error switch to CPU", re.args)
+        print(traceback.format_exc())
+        logger.error(f"error occurred {re.args} at {str(traceback.format_exc())}")        
         if "CUDA failed with error out of memory" in str(re.args):
-            model = WhisperModel(model_size_or_path=model_id, device="cpu", cpu_threads=cpu_count)
+            model = WhisperModel(model_size_or_path=model_id, device="cpu", cpu_threads=cpu_count,download_root=download_root)
             segments, info = model.transcribe(filepath, task = task, beam_size=beam_size,vad_filter=True)
             for segment in segments:
                 if timeline:
@@ -159,9 +174,11 @@ def transcribe_video(filepath:str,chatbot:list=[],history:list=[],
     else:
         raise ValueError(f"unsupported audio export transcriber {export_transcriber}")
 
-def youtube_download(url:str,local_storage:str="./downloads"):
+def youtube_download(url:str,local_storage:str="./workspace/downloads"):
     from pytube import YouTube    
     import time    
+    if os.path.exists(local_storage):
+        os.mkdir(local_storage)
     t0 = time.perf_counter()     
     local_file = None   
     try:
@@ -169,13 +186,16 @@ def youtube_download(url:str,local_storage:str="./downloads"):
         local_file = link.streams.filter(only_audio=True)[0].download(local_storage)
     except Exception as e:
         print(f"youtube_download error:",e)    
+        print(traceback.format_exc())        
+        logger.error(f"error occurred {e.args} at {str(traceback.format_exc())}")                
         raise e 
     took_in_seconds = time.perf_counter() - t0  
     status_msg=f"youtube_download [{url}] took {took_in_seconds:.2f} seconds"   
     print(status_msg) 
     return local_file       
 
-def transcribe_youtube(input_url:str, chatbot:list=[],history:list=[],export_transcriber:str="distil_whisper"):
+def transcribe_youtube(input_url:str, chatbot:list=[],history:list=[],
+                       export_transcriber:str="distil_whisper"):
     import os
     import time
     t0 = time.perf_counter()    
@@ -192,6 +212,8 @@ def transcribe_youtube(input_url:str, chatbot:list=[],history:list=[],export_tra
         status_msg=f"transcribe_youtube finished in {took_in_seconds:.2f} seconds"   
     except Exception as e:
         print("transcribe exception ", e)
+        print(traceback.format_exc())        
+        logger.error(f"error occurred {e.args} at {str(traceback.format_exc())}")                        
     finally:
         ...  # skip clean up to save download time 
         # if local_filepath is not None:
@@ -202,7 +224,7 @@ def word_count(self,string):
     return(len(string.strip().split(" ")))
 
 if __name__=="__main__":
-    audio_file="/home/pop/Music/伍珂玥_曼珠莎华.mp3"
+    audio_file="/home/pop/Music/mc_voice3.wav"
     #audio_file="/home/pop/Downloads/ted_60.wav"
     #https://www.youtube.com/watch?v=mu1Inz3ltlo (RAG)
     #https://www.youtube.com/watch?v=NePAPGxZnmE (Graph demo)
