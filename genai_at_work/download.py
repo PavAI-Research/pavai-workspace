@@ -21,8 +21,8 @@ def check_and_get_downloads():
 
         ## Download a single file
         print("MULTIMODAL")
-        model_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
-        project_file=hf_hub_download(repo_id=config["HF_MM_REPO_ID"], filename=config["HF_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
+        model_file=hf_hub_download(repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
+        project_file=hf_hub_download(repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
         print(model_file)
         print(project_file)
         progress.update(task1, advance=40)

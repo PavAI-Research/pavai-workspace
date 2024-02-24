@@ -10,12 +10,13 @@ import gradio as gr
 import pandas as pd
 import os
 import time
-import chatopenai
-import chatprompt
-import mediadata
-import filedata
-import webdata
-import historydata
+#import chatopenai
+import genai_at_work.chatbotllm as chatbotllm
+import genai_at_work.chatprompt as chatprompt
+import genai_at_work.mediadata as mediadata
+import genai_at_work.filedata as filedata
+import genai_at_work.webdata as webdata
+import genai_at_work.historydata as historydata
 
 class ChatbotWorkspace:
 
@@ -284,6 +285,16 @@ class ChatbotWorkspace:
             )
         return chatbot, history
 
+    def get_api_host(self):
+        if config["LLM_PROVIDER"]=="all-in-one":
+            return config["LLM_PROVIDER"]                   
+        elif config["LLM_PROVIDER"]=="ollama":
+            return config["OLLAMA_API_HOST"]
+        elif config["LLM_PROVIDER"]=="openai":    
+            return config["OPENAI_API_HOST"]           
+        else:
+            return "Missing, configuration error!"
+
     def build_workspace_ui(self):
         self.blocks_workspace = gr.Blocks(analytics_enabled=False)
         with self.blocks_workspace:
@@ -362,7 +373,6 @@ class ChatbotWorkspace:
                             self.upload_file_box,
                         ],
                     )
-                    # styler = df.style.highlight_max(color = 'lightgreen', axis = 0)
 
                     with gr.Row():
                         with gr.Column(scale=1):
@@ -420,179 +430,8 @@ class ChatbotWorkspace:
 
                         btn_reset_history = gr.Button("Reset history", size="sm")
                         btn_reset_history.click(fn=self.reset_history)
-                        ## functions
 
                 with gr.Column(scale=7):
-                    ## Seamless Communication ##
-                    # with gr.Accordion(
-                    #     "Speech-to-Speech Multilingual Translator", open=False
-                    # ):
-                    #     gr.Markdown(
-                    #         "Speak on your own native language over-voice with another party using realtime speech-to-speech translation."
-                    #     )
-                    #     with gr.Group(visible=True) as voicechat:
-                    #         with gr.Row():
-                    #             with gr.Column(scale=5):
-                    #                 source_language = gr.Dropdown(
-                    #                     label="User Spoken language",
-                    #                     choices=multilingual.ASR_TARGET_LANGUAGE_NAMES,
-                    #                     value="English",
-                    #                 )
-                    #                 input_audio = gr.Audio(
-                    #                     sources=["microphone", "upload"],
-                    #                     label="User voice",
-                    #                     type="filepath",
-                    #                     scale=1,
-                    #                     min_width=20,
-                    #                 )
-                    #                 # user_speech_text = gr.Text(label="Your voice text", lines=2)
-                    #                 btn_translate = gr.Button(
-                    #                     "Translate User Speech to Party",
-                    #                     size="sm",
-                    #                     scale=1,
-                    #                 )
-                    #             with gr.Column(scale=5):
-                    #                 party_source_language = gr.Dropdown(
-                    #                     label="Party Spoken language",
-                    #                     choices=multilingual.ASR_TARGET_LANGUAGE_NAMES,
-                    #                     value="French",
-                    #                 )
-                    #                 party_input_audio = gr.Audio(
-                    #                     sources=["microphone", "upload"],
-                    #                     label="Party voice",
-                    #                     type="filepath",
-                    #                     scale=1,
-                    #                     min_width=20,
-                    #                 )
-                    #                 # party_speech_text = gr.Text(label="Party voice text", lines=2)
-                    #                 party_btn_translate = gr.Button(
-                    #                     "Translate Party Speech to User",
-                    #                     size="sm",
-                    #                     scale=1,
-                    #                 )
-
-                    #         with gr.Row():
-                    #             with gr.Column():
-                    #                 with gr.Group():
-                    #                     target_language = gr.Dropdown(
-                    #                         label="Target Party language",
-                    #                         choices=multilingual.S2ST_TARGET_LANGUAGE_NAMES,
-                    #                         value=multilingual.DEFAULT_TARGET_LANGUAGE,
-                    #                     )
-                    #                     xspeaker = gr.Slider(
-                    #                         1,
-                    #                         100,
-                    #                         value=7,
-                    #                         step=1,
-                    #                         label="Speaker Id",
-                    #                         interactive=True,
-                    #                     )
-                    #                     output_audio = gr.Audio(
-                    #                         label="Translated speech",
-                    #                         autoplay=True,
-                    #                         streaming=False,
-                    #                         type="numpy",
-                    #                     )
-                    #                     output_text = gr.Textbox(
-                    #                         label="Translated text", lines=3
-                    #                     )
-                    #                     btn_clear = gr.ClearButton(
-                    #                         [
-                    #                             source_language,
-                    #                             input_audio,
-                    #                             output_audio,
-                    #                             output_text,
-                    #                         ],
-                    #                         size="sm",
-                    #                     )
-
-                    #             ## Other Party
-                    #             with gr.Column():
-                    #                 with gr.Group():
-                    #                     party_target_language = gr.Dropdown(
-                    #                         label="Target User language",
-                    #                         choices=multilingual.S2ST_TARGET_LANGUAGE_NAMES,
-                    #                         value="English",
-                    #                     )
-                    #                     party_xspeaker = gr.Slider(
-                    #                         1,
-                    #                         100,
-                    #                         value=7,
-                    #                         step=1,
-                    #                         label="Speaker Id",
-                    #                         interactive=True,
-                    #                     )
-                    #                     party_output_audio = gr.Audio(
-                    #                         label="Translated speech",
-                    #                         autoplay=True,
-                    #                         streaming=False,
-                    #                         type="numpy",
-                    #                     )
-                    #                     party_output_text = gr.Textbox(
-                    #                         label="Translated text", lines=3
-                    #                     )
-                    #                     party_btn_clear = gr.ClearButton(
-                    #                         [
-                    #                             party_source_language,
-                    #                             party_input_audio,
-                    #                             party_output_audio,
-                    #                             party_output_text,
-                    #                         ],
-                    #                         size="sm",
-                    #                     )
-
-                    #                     # handle speaker id change
-                    #                     party_xspeaker.change(
-                    #                         fn=multilingual.SeamlessM4T().update_value, inputs=xspeaker
-                    #                     )
-                    #             # handle
-                    #             btn_translate.click(
-                    #                 fn=multilingual.SeamlessM4T().run_s2st,
-                    #                 inputs=[
-                    #                     input_audio,
-                    #                     source_language,
-                    #                     target_language,
-                    #                     xspeaker,
-                    #                 ],
-                    #                 outputs=[output_audio, output_text],
-                    #                 api_name="s2st",
-                    #             )
-
-                    #             # handle
-                    #             party_btn_translate.click(
-                    #                 fn=multilingual.SeamlessM4T().run_s2st,
-                    #                 inputs=[
-                    #                     party_input_audio,
-                    #                     party_source_language,
-                    #                     party_target_language,
-                    #                     party_xspeaker,
-                    #                 ],
-                    #                 outputs=[party_output_audio, party_output_text],
-                    #                 api_name="s2st_party",
-                    #             )
-
-                    #             ## auto submit
-                    #             input_audio.stop_recording(
-                    #                 fn=multilingual.SeamlessM4T().run_s2st,
-                    #                 inputs=[
-                    #                     input_audio,
-                    #                     source_language,
-                    #                     target_language,
-                    #                 ],
-                    #                 outputs=[output_audio, output_text],
-                    #             )
-
-                    #             ## auto submit
-                    #             party_input_audio.stop_recording(
-                    #                 fn=multilingual.SeamlessM4T().run_s2st,
-                    #                 inputs=[
-                    #                     party_input_audio,
-                    #                     party_source_language,
-                    #                     party_target_language,
-                    #                 ],
-                    #                 outputs=[party_output_audio, party_output_text],
-                    #             )
-
                     ## CHATBOT ##
                     with gr.Accordion("Generative AI Chatbot", open=True):
                         with gr.Accordion("Assistant Mode", open=False):
@@ -682,14 +521,13 @@ class ChatbotWorkspace:
                                 min_width=30,
                                 interactive=True,
                             )
-
+                                                             
                         with gr.Accordion("Model Parameters", open=False):
-                            # server_status_code = gr.Textbox(label="Status code from server")
                             with gr.Row():
                                 with gr.Column():
                                     api_host = gr.Textbox(
                                         label="API base",
-                                        value=config["API_HOST"],
+                                        value=self.get_api_host(),
                                     )
                                 with gr.Column():
                                     active_model = gr.Textbox(
@@ -709,7 +547,7 @@ class ChatbotWorkspace:
                                     model_dropdown = gr.Dropdown(
                                         label="Available models",
                                         value="zephyr:latest",
-                                        choices=chatopenai.list_models(),
+                                        choices=chatbotllm.list_models(),
                                         info="select a model",
                                         interactive=True,
                                     )
@@ -813,7 +651,7 @@ class ChatbotWorkspace:
 
                     ## input message
                     txt_message = box_message.submit(
-                        chatopenai.message_and_history_v2,
+                        chatbotllm.message_and_history_v2,
                         inputs=[
                             api_host,
                             api_key,
@@ -840,7 +678,7 @@ class ChatbotWorkspace:
                     )
                     ## send button
                     btn_clicked = btn_submit.click(
-                        chatopenai.message_and_history_v2,
+                        chatbotllm.message_and_history_v2,
                         inputs=[
                             api_host,
                             api_key,
@@ -884,7 +722,7 @@ class ChatbotWorkspace:
 
                 ## upload image ##
                 self.upload_image_box.upload(
-                    fn=chatopenai.upload_image,
+                    fn=chatbotllm.upload_image,
                     inputs=[
                         api_host,
                         api_key,
@@ -938,111 +776,3 @@ class ChatbotWorkspace:
                     outputs=[chatbot, state],
                 )
         return self.blocks_workspace
-
-    # def build_scratchpad_ui(self):
-    #     self.blocks_scratchpad = gr.Blocks()
-    #     with self.blocks_scratchpad:
-    #         with gr.Accordion("Important tasks to complete", open=True):
-    #             box_notepad = gr.TextArea(
-    #                 lines=3,
-    #                 info="write single page tasks.",
-    #                 interactive=True,
-    #             )
-    #             with gr.Row():
-    #                 with gr.Column(scale=3):
-    #                     btn_save_notepad = gr.Button(
-    #                         size="sm", value="save and update"
-    #                     )
-    #                 with gr.Column(scale=1):
-    #                     btn_load_notepad = gr.Button(size="sm", value="load")
-
-    #             ## function: scratch pad
-    #             def save_notespad(text_notes):
-    #                 gr.Info("saved notes to tasks.txt!")
-    #                 return filedata.save_text_file("./workspace/tasks.txt", text_notes)
-
-    #             def load_notespad(filename: str = "./workspace/tasks.txt"):
-    #                 gr.Info("load notes")
-    #                 return filedata.get_text_file(filename)
-
-    #             btn_save_notepad.click(fn=save_notespad, inputs=[box_notepad])
-    #             btn_load_notepad.click(fn=load_notespad, outputs=[box_notepad])
-    #             ## update expert mode and speech style
-    #         with gr.Accordion("Notes", open=False):
-    #             box_notepad = gr.TextArea(
-    #                 lines=5,
-    #                 info="write single page quick notes.",
-    #                 interactive=True,
-    #             )
-    #             with gr.Row():
-    #                 with gr.Column(scale=3):
-    #                     btn_save_notepad = gr.Button(
-    #                         size="sm", value="save and update"
-    #                     )
-    #                 with gr.Column(scale=1):
-    #                     btn_load_notepad = gr.Button(size="sm", value="load")
-
-    #             ## function: scratch pad
-    #             def save_notespad(text_notes):
-    #                 gr.Info("saved notes to notes.txt!")
-    #                 return filedata.save_text_file("./workspace/notes.txt", text_notes)
-
-    #             def load_notespad(filename: str = "./workspace/notes.txt"):
-    #                 gr.Info("load notes")
-    #                 return filedata.get_text_file(filename)
-
-    #             btn_save_notepad.click(fn=save_notespad, inputs=[box_notepad])
-    #             btn_load_notepad.click(fn=load_notespad, outputs=[box_notepad])
-    #             ## update expert mode and speech style
-    #         with gr.Accordion("Todos", open=False):
-    #             box_notepad = gr.TextArea(
-    #                 lines=3,
-    #                 info="write single page of Todos.",
-    #                 interactive=True,
-    #             )
-    #             with gr.Row():
-    #                 with gr.Column(scale=3):
-    #                     btn_save_notepad = gr.Button(
-    #                         size="sm", value="save and update"
-    #                     )
-    #                 with gr.Column(scale=1):
-    #                     btn_load_notepad = gr.Button(size="sm", value="load")
-
-    #             ## function: scratch pad
-    #             def save_notespad(text_notes):
-    #                 gr.Info("saved notes to todos.txt!")
-    #                 return filedata.save_text_file("./workspace/todos.txt", text_notes)
-
-    #             def load_notespad(filename: str = "./workspace/todos.txt"):
-    #                 gr.Info("load notes")
-    #                 return filedata.get_text_file(filename)
-
-    #             btn_save_notepad.click(fn=save_notespad, inputs=[box_notepad])
-    #             btn_load_notepad.click(fn=load_notespad, outputs=[box_notepad])
-    #             ## update expert mode and speech style
-    #         with gr.Accordion("Reminders", open=False):
-    #             box_notepad = gr.TextArea(
-    #                 lines=3,
-    #                 info="write single page of Todos.",
-    #                 interactive=True,
-    #             )
-    #             with gr.Row():
-    #                 with gr.Column(scale=3):
-    #                     btn_save_notepad = gr.Button(
-    #                         size="sm", value="save and update"
-    #                     )
-    #                 with gr.Column(scale=1):
-    #                     btn_load_notepad = gr.Button(size="sm", value="load")
-
-    #             ## function: scratch pad
-    #             def save_notespad(text_notes):
-    #                 gr.Info("saved notes to reminder.txt!")
-    #                 return filedata.save_text_file("./workspace/reminder.txt", text_notes)
-
-    #             def load_notespad(filename: str = "./workspace/reminder.txt"):
-    #                 gr.Info("load notes")
-    #                 return filedata.get_text_file(filename)
-
-    #             btn_save_notepad.click(fn=save_notespad, inputs=[box_notepad])
-    #             btn_load_notepad.click(fn=load_notespad, outputs=[box_notepad])
-    #             ## update expert mode and speech style

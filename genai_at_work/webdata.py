@@ -101,7 +101,7 @@ async def aget_results(word):
     from duckduckgo_search import AsyncDDGS
     results = []        
     async with AsyncDDGS() as ddgs:
-        ddgs_results = [r async for r in ddgs.text(word, max_results=None)]
+        ddgs_results = [r async for r in ddgs.text(word, max_results=5)]
         for r in ddgs_results:
             results.append(r)
         return results

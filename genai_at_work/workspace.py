@@ -9,9 +9,9 @@ config = {
 import gradio as gr
 import pandas as pd
 import os
-import translator_ui
-import scratchpad_ui
-import chatbot_ui
+import genai_at_work.translator_ui as translator_ui
+import genai_at_work.scratchpad_ui as scratchpad_ui
+import genai_at_work.chatbot_ui as chatbot_ui
 
 # # theme=gr.themes.Monochrome()
 # demoui = gr.Blocks(theme=gr.themes.Glass())
@@ -36,6 +36,7 @@ class AppMain(chatbot_ui.ChatbotWorkspace, scratchpad_ui.ScratchPad, translator_
             os.makedirs("workspace/scratchpad")
             os.makedirs("workspace/downloads")            
             os.makedirs("workspace/session_logs")
+        print("startup is good at this point")
 
     def main(self):
         chatbot_tab = self.build_workspace_ui()
@@ -47,10 +48,11 @@ class AppMain(chatbot_ui.ChatbotWorkspace, scratchpad_ui.ScratchPad, translator_
             title="🌟✨ PAVAI Seamless Workspace",
              analytics_enabled=False 
         )
+        print("system ready!")
 
     def launch(self,server_name:str="0.0.0.0",server_port:int=7860,share:bool=False):
         background_image="resources/images/pavai_logo_large.png"
-        authorized_users=[("abc:123"),("admin:123"),("john:smith"),("hello:hello")]      
+        authorized_users=[("abc:123"),("john:smith"),("pavai:pavai")]      
         auth=[tuple(cred.split(':')) for cred in authorized_users] if authorized_users else None         
         absolute_path = os.path.abspath(background_image)
         self.startup_check()
