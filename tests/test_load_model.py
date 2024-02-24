@@ -1,9 +1,9 @@
-import genai_at_work.translator as translator 
-import genai_at_work.llamacpp as llamacpp 
+#import genai_at_work.translator as translator 
+import genai_at_work.chatllamacpp as chatllamacpp 
 import genai_at_work.mediadata as mediadata
 
 if __name__=="__main__":
-    model_file, project_file = llamacpp.download_models()
+    model_file, project_file = chatllamacpp.download_models()
     print(model_file)
     print(project_file)
 

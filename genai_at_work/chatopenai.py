@@ -29,7 +29,7 @@ pretty.install()
 #API_HOST = "http://192.168.0.29:8004"
 LLM_PROVIDER=config["LLM_PROVIDER"]
 
-API_HOST=config["LLAMACPP_API_HOST"]
+API_HOST=config["OPENAI_API_HOST"]
 API_URL_BASE = f"{API_HOST}/v1"
 API_URL_CHAT = f"{API_URL_BASE}/chat/completions"
 
@@ -76,7 +76,6 @@ def add_messages_v1(
     else:
         return messages
 
-
 def add_messages(history:list=None,system_prompt:str=None, 
                  user_prompt:str=None,ai_prompt:str=None,image_list:list=None, base64_image=None):
     messages=[]
@@ -115,7 +114,6 @@ def add_messages(history:list=None,system_prompt:str=None,
     else:
         return messages
 
-
 def api_calling_streaming(
     prompt: str, chatbot: list = [], history: list = [], model: str = "zephyr:latest"
 ):
@@ -144,7 +142,6 @@ def api_calling_streaming(
             time.sleep(0.05)
             history.append({"role": "assistant", "content": partial_message})
             yield [(prompt, partial_message)], history
-
 
 def api_calling(prompt: str, history: list = None, model: str = "zephyr:latest"):
     messages = add_messages(user_prompt=prompt, history=history)
