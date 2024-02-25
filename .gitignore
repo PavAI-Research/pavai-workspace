@@ -20,6 +20,8 @@ test_data
 resources/models
 resources/historydb
 resources/session_logs
+resources/crewai_job_db
+resources/news_search_db
 
 workspace/scratchpad
 workspace/downloads

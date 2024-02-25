@@ -5,6 +5,8 @@
 # !pip install -q git+https://github.com/huggingface/transformers
 # !pip install -q accelerate optimum
 # pip install pytube
+# pip install youtube-transcript-api
+
 import os 
 from dotenv import dotenv_values
 config = {
@@ -24,6 +26,7 @@ import traceback
 import time 
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import torch
+
 
 HF_CACHE_DIR=config["HF_CACHE_DIR"] #"resources/models"
 print("hf_cache_dir: ", HF_CACHE_DIR)
@@ -220,15 +223,55 @@ def transcribe_youtube(input_url:str, chatbot:list=[],history:list=[],
         #     os.remove(local_filepath) 
     return chatbot, history     
 
+def download_youtube_transcript(video_id:str,languages:dict=['en'], mode:str="auto"):
+    from youtube_transcript_api import YouTubeTranscriptApi
+    # the base class to inherit from when creating your own formatter.
+    from youtube_transcript_api.formatters import Formatter
+    # some provided subclasses, each outputs a different string format.
+    from youtube_transcript_api.formatters import JSONFormatter
+    from youtube_transcript_api.formatters import TextFormatter
+    from youtube_transcript_api.formatters import WebVTTFormatter
+    from youtube_transcript_api.formatters import SRTFormatter
+
+    transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+    transcript=""    
+    # filter for manually created transcripts
+    if mode=="manual":
+        transcript = transcript_list.find_manually_created_transcript(languages)
+    else:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)        
+        # or automatically generated ones
+        # transcript = transcript_list.find_generated_transcript(languages)
+    text_formatter = TextFormatter()
+    result_text = text_formatter.format_transcript(transcript)
+    return result_text
+
+def download_youtube_translate(video_id:str,languages:dict=['en'], translate_lang:str=None):
+    from youtube_transcript_api import YouTubeTranscriptApi
+    from youtube_transcript_api.formatters import TextFormatter    
+    transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)    
+    transcript = transcript_list.find_transcript(languages)
+    ##print(transcript.translation_languages)
+    translated_transcript = transcript.translate(translate_lang)
+    script_text = translated_transcript.fetch()
+    text_formatter = TextFormatter()
+    result_text = text_formatter.format_transcript(script_text)    
+    return result_text
+
 def word_count(self,string):
     return(len(string.strip().split(" ")))
 
 if __name__=="__main__":
+    langs={'Afrikaans': 'af', 'Akan': 'ak', 'Albanian': 'sq', 'Amharic': 'am', 'Arabic': 'ar', 'Armenian': 'hy', 'Assamese': 'as', 'Aymara': 'ay', 'Azerbaijani': 'az', 'Bangla': 'bn', 'Basque': 'eu', 'Belarusian': 'be', 'Bhojpuri': 'bho', 'Bosnian': 'bs', 'Bulgarian': 'bg', 'Burmese': 'my', 'Catalan': 'ca', 'Cebuano': 'ceb', 'Chinese (Simplified)': 'zh-Hans', 'Chinese (Traditional)': 'zh-Hant', 'Corsican': 'co', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da', 'Divehi': 'dv', 'Dutch': 'nl', 'English': 'en', 'Esperanto': 'eo', 'Estonian': 'et', 'Ewe': 'ee', 'Filipino': 'fil', 'Finnish': 'fi', 'French': 'fr', 'Galician': 'gl', 'Ganda': 'lg', 'Georgian': 'ka', 'German': 'de', 'Greek': 'el', 'Guarani': 'gn', 'Gujarati': 'gu', 'Haitian Creole': 'ht', 'Hausa': 'ha', 'Hawaiian': 'haw', 'Hebrew': 'iw', 'Hindi': 'hi', 'Hmong': 'hmn', 'Hungarian': 'hu', 'Icelandic': 'is', 'Igbo': 'ig', 'Indonesian': 'id', 'Irish': 'ga', 'Italian': 'it', 'Japanese': 'ja', 'Javanese': 'jv', 'Kannada': 'kn', 'Kazakh': 'kk', 'Khmer': 'km', 'Kinyarwanda': 'rw', 'Korean': 'ko', 'Krio': 'kri', 'Kurdish': 'ku', 'Kyrgyz': 'ky', 'Lao': 'lo', 'Latin': 'la', 'Latvian': 'lv', 'Lingala': 'ln', 'Lithuanian': 'lt', 'Luxembourgish': 'lb', 'Macedonian': 'mk', 'Malagasy': 'mg', 'Malay': 'ms', 'Malayalam': 'ml', 'Maltese': 'mt', 'Māori': 'mi', 'Marathi': 'mr', 'Mongolian': 'mn', 'Nepali': 'ne', 'Northern Sotho': 'nso', 'Norwegian': 'no', 'Nyanja': 'ny', 'Odia': 'or', 'Oromo': 'om', 'Pashto': 'ps', 'Persian': 'fa', 'Polish': 'pl', 'Portuguese': 'pt', 'Punjabi': 'pa', 'Quechua': 'qu', 'Romanian': 'ro', 'Russian': 'ru', 'Samoan': 'sm', 'Sanskrit': 'sa', 'Scottish Gaelic': 'gd', 'Serbian': 'sr', 'Shona': 'sn', 'Sindhi': 'sd', 'Sinhala': 'si', 'Slovak': 'sk', 'Slovenian': 'sl', 'Somali': 'so', 'Southern Sotho': 'st', 'Spanish': 'es', 'Sundanese': 'su', 'Swahili': 'sw', 'Swedish': 'sv', 'Tajik': 'tg', 'Tamil': 'ta', 'Tatar': 'tt', 'Telugu': 'te', 'Thai': 'th', 'Tigrinya': 'ti', 'Tsonga': 'ts', 'Turkish': 'tr', 'Turkmen': 'tk', 'Ukrainian': 'uk', 'Urdu': 'ur', 'Uyghur': 'ug', 'Uzbek': 'uz', 'Vietnamese': 'vi', 'Welsh': 'cy', 'Western Frisian': 'fy', 'Xhosa': 'xh', 'Yiddish': 'yi', 'Yoruba': 'yo', 'Zulu': 'zu'}
     audio_file="/home/pop/Music/mc_voice3.wav"
     #audio_file="/home/pop/Downloads/ted_60.wav"
     #https://www.youtube.com/watch?v=mu1Inz3ltlo (RAG)
     #https://www.youtube.com/watch?v=NePAPGxZnmE (Graph demo)
-    chatbot, history = faster_whisper(filepath=audio_file,task="transcribe")
+    # chatbot, history = faster_whisper(filepath=audio_file,task="transcribe")
     #chatbot, history = distil_whisper(filepath=audio_file)
-    print(chatbot)
+    #result = download_youtube_transcript(video_id="8Wy5fqkQrI0")'Chinese (Simplified)'
+    result = download_youtube_translate(video_id="8Wy5fqkQrI0",translate_lang="zh-Hans")
+    print(langs['Akan'])
+    #print(result)
+
 

@@ -97,7 +97,7 @@ def scrap_web(website_url:str, chatbot:list=[],history:list=[], tool:str="seleni
     print(f"scrap_web took {took}s")
     return chatbot, history 
 
-async def aget_results(word):
+async def agent_results(word):
     from duckduckgo_search import AsyncDDGS
     results = []        
     async with AsyncDDGS() as ddgs:
@@ -107,22 +107,12 @@ async def aget_results(word):
         return results
 
 def web_search(keywords:str, chatbot:list=[],history:list=[],max_results=5,timelimit=None,region=None, backend="lite",safesearch="moderate",tool:str="duckduckgo"):
-    from duckduckgo_search import DDGS
     import time
     import asyncio
 
     t0=time.perf_counter()    
     results = []
-    results = asyncio.run(aget_results(keywords))
-    # with DDGS() as ddgs:
-    #     ddgs_results = [r for r in ddgs.text(keywords=keywords,
-    #                                             safesearch=safesearch,
-    #                                             backend=backend,
-    #                                             region=region,
-    #                                             timelimit=timelimit,
-    #                                             max_results=max_results)]
-    #     for r in ddgs_results:
-    #         results.append(r)
+    results = asyncio.run(agent_results(keywords))
     formatted_output=""
     if isinstance(results,list):
         for r in results:
@@ -137,7 +127,6 @@ def web_search(keywords:str, chatbot:list=[],history:list=[],max_results=5,timel
     history.append({"role": "user", "content": f"web search for {keywords}\nResult found:\n{formatted_output}"})        
     print(f"scrap_web took {took}s")
     return chatbot, history 
-
 
 if __name__=="__main__":
     website = "https://phys.org/news/2023-11-qa-dont-blame-chatbots.html"

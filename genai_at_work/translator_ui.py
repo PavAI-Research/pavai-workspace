@@ -183,6 +183,9 @@ class CommunicationTranslator:
                                     ],
                                     outputs=[party_output_audio, party_output_text],
                                 )
+
+            with gr.Row():
+                gr.Markdown("Limitations: if you have a microphoe plugin but not seen in the browser. the issue could be the url is not localhost or secure connection. please consult the browser settings.")                    
         return self.blocks_translator
 
 # # theme=gr.themes.Monochrome()

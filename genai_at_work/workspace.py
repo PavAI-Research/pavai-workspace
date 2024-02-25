@@ -12,11 +12,15 @@ import os
 import genai_at_work.translator_ui as translator_ui
 import genai_at_work.scratchpad_ui as scratchpad_ui
 import genai_at_work.chatbot_ui as chatbot_ui
+import genai_at_work.summarizer_ui as summarizer_ui
+import genai_at_work.websearch_ui as websearch_ui
 
 # # theme=gr.themes.Monochrome()
 # demoui = gr.Blocks(theme=gr.themes.Glass())
 
-class AppMain(chatbot_ui.ChatbotWorkspace, scratchpad_ui.ScratchPad, translator_ui.CommunicationTranslator):
+class AppMain(chatbot_ui.ChatbotWorkspace, scratchpad_ui.ScratchPad, 
+              translator_ui.CommunicationTranslator, 
+              summarizer_ui.DocumentSummarizer, websearch_ui.WebResearchCrew):
 
     def __init__(self):
         super().__init__()
@@ -41,11 +45,13 @@ class AppMain(chatbot_ui.ChatbotWorkspace, scratchpad_ui.ScratchPad, translator_
     def main(self):
         chatbot_tab = self.build_workspace_ui()
         translator_tab = self.build_translator_ui()                
-        scratchpad_tab = self.build_scratchpad_ui()        
+        scratchpad_tab = self.build_scratchpad_ui()  
+        summarizer_tab = self.build_summarizer_ui()   
+        websearch_tab = self.build_webresearch_ui()
         self.app = gr.TabbedInterface(
-            [chatbot_tab,translator_tab,scratchpad_tab],
-            ["Chatbot At Work","Seamless Communication","Scratch Pad"],
-            title="🌟✨ PAVAI Seamless Workspace",
+            [chatbot_tab,translator_tab,summarizer_tab,websearch_tab,scratchpad_tab],
+            ["Chatbot At Work","Seamless Communication","Long-Text Summarizer","Web Search Crew","Scratch Pad"],
+            title="🌟✨ Pavai Seamless Workspace",
              analytics_enabled=False 
         )
         print("system ready!")
