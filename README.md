@@ -13,3 +13,4 @@ CMAKE_ARGS="-DLLAMA_CUBLAS=on" poetry run pip install llama-cpp-python==0.2.27 -
 
 
 ### ollama installation
+poetry export --without-hashes --format=requirements.txt > requirements.txt

@@ -449,34 +449,35 @@ class ChatbotWorkspace:
                                         interactive=True,
                                     )
 
-                        with gr.Accordion("Session Logs", open=False):
-                            with gr.Row():
-                                chat_logs = gr.Dropdown(
-                                    label="Log files",
-                                    choices=filedata.list_session_files(),
-                                    interactive=True,
-                                )
-                            with gr.Row():
-                                btn_load_chat_log = gr.Button(
-                                    value="Load to chat",
-                                    size="sm",
-                                    scale=2,
-                                    min_width=30,
-                                    interactive=True,
-                                )
-                                btn_delete_chat_log = gr.Button(
-                                    value="Delete",
-                                    size="sm",
-                                    scale=1,
-                                    min_width=30,
-                                    interactive=True,
-                                )
+                        # with gr.Accordion("Session Logs", open=False):
+                        #     with gr.Row():
+                        #         chat_logs = gr.Dropdown(
+                        #             label="Log files",
+                        #             choices=filedata.list_session_files(),
+                        #             interactive=True,
+                        #         )
+                        #     with gr.Row():
+                        #         btn_load_chat_log = gr.Button(
+                        #             value="Load to chat",
+                        #             size="sm",
+                        #             scale=2,
+                        #             min_width=30,
+                        #             interactive=True,
+                        #         )
+                        #         btn_delete_chat_log = gr.Button(
+                        #             value="Delete",
+                        #             size="sm",
+                        #             scale=1,
+                        #             min_width=30,
+                        #             interactive=True,
+                        #         )
 
                         chatbot = gr.Chatbot(
                             [],
                             label="Chatbot",
                             elem_id="chatbot",
                             bubble_full_width=False,
+                            show_copy_button=True
                         )
                         with gr.Row():
                             with gr.Column(scale=2):
@@ -492,6 +493,7 @@ class ChatbotWorkspace:
                                 show_label=False,
                                 placeholder="Enter text and press enter",
                                 container=False,
+                                autofocus=True,
                             )
                         with gr.Row():
                             btn_submit = gr.Button("Send", scale=3)
@@ -617,6 +619,29 @@ class ChatbotWorkspace:
                                     chat_counter = gr.Number(
                                         value=0, visible=False, precision=0
                                     )
+
+                        with gr.Accordion("Session Logs", open=False):
+                            with gr.Row():
+                                chat_logs = gr.Dropdown(
+                                    label="Log files",
+                                    choices=filedata.list_session_files(),
+                                    interactive=True,
+                                )
+                            with gr.Row():
+                                btn_load_chat_log = gr.Button(
+                                    value="Load to chat",
+                                    size="sm",
+                                    scale=2,
+                                    min_width=30,
+                                    interactive=True,
+                                )
+                                btn_delete_chat_log = gr.Button(
+                                    value="Delete",
+                                    size="sm",
+                                    scale=1,
+                                    min_width=30,
+                                    interactive=True,
+                                )
 
                     with gr.Accordion("Scratch Pad", open=False):
                         box_notepad=gr.TextArea(lines=7,label="Notes", info="write single page quick notes.", interactive=True)                    

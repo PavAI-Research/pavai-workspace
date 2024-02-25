@@ -189,7 +189,7 @@ class CommunicationTranslator:
         return self.blocks_translator
 
 # # theme=gr.themes.Monochrome()
-# demoui = gr.Blocks(theme=gr.themes.Glass())
+#theme=gr.themes.Glass())
 
 class AppMain(CommunicationTranslator):
 

@@ -31,33 +31,6 @@ asclient = AsyncClient(host=API_HOST)
 # client = Client(host='http://192.168.0.18:12345')
 # asclient = AsyncClient(host='http://192.168.0.18:12345')
 
-
-# def add_messages(history:list=None,system_prompt:str=None, 
-#                  user_prompt:str=None,ai_prompt:str=None,image_list:list=None):
-#     messages=[]
-#     if system_prompt:
-#         messages.append({"role": "system", "content": system_prompt})
-#     if user_prompt:
-#         messages.append({"role": "user", "content": user_prompt})    
-#     if ai_prompt:
-#         messages.append({"role": "assistant", "content": ai_prompt})  
-#     if image_list:
-#         messages.append({
-#             "role": "user",
-#             "content": [
-#                 {
-#                     "type": "image_url",
-#                     "image_url": {
-#                         "url": image_list[0]
-#                     },
-#                 },
-#                 {"type": "text", "text": user_prompt},
-#             ],})            
-#     if history:
-#         return history+messages
-#     else:
-#         return messages
-
 def num_tokens_from_string(string: str) -> int:
     """Returns the number of tokens in a text string."""
     encoding = tiktoken.encoding_for_model("gpt-4-1106-preview")
@@ -65,6 +38,7 @@ def num_tokens_from_string(string: str) -> int:
     return num_tokens
 
 def count_messages_token(messages:list):
+    content=""
     if messages is None:
         return 0    
     if isinstance(messages, str):
@@ -93,8 +67,12 @@ def add_messages(history:list=None,system_prompt:str=None,
 def embeddings(model:str,prompt:str):
     return client.embeddings(model=model, prompt=prompt)
 
-def list_models(model):
-    return client.list()
+def list_models():
+    models = client.list()
+    model_names=[]
+    for model in models["models"]:
+        model_names.append(model['name'])
+    return model_names
 
 def pull_models(model):
     return client.pull(model)
@@ -194,7 +172,7 @@ def message_and_history_v2(
     api_host:str=None,
     api_key:str="EMPTY",
     active_model:str="zephyr:latest",           
-    user_prompt: str=None,
+    prompt: str=None,
     chatbot: list = [],
     history: list = [],
     system_prompt: str = None,
@@ -208,7 +186,7 @@ def message_and_history_v2(
     t0=time.perf_counter()
     chatbot = chatbot or []
     print("#########################################")
-    print(user_prompt)
+    print(prompt)
     if isinstance(stop_words, str):
         stop_words=[stop_words]
     else:
@@ -252,12 +230,12 @@ def message_and_history_v2(
         api_host=api_host,
         api_key=api_key,
         active_model=active_model,            
-        user_prompt=user_prompt,
+        user_prompt=prompt,
         history=history,
         system_prompt=system_prompt,
         options=options
     )
-    chatbot.append((user_prompt, output))
+    chatbot.append((prompt, output))
     print("------------------")
     print(chatbot)
     print("*********************")
@@ -322,14 +300,6 @@ def upload_image(
     chatbot.append((image, reply_text))
     return chatbot, messages
 
-# upload_websearch=None,
-# upload_weburl=None,
-# upload_youtube_url=None,
-# upload_file=None,
-# upload_image=None,
-# upload_video=None,
-# upload_audio=None
-
 def message_and_history_v3(
     api_host:str=None,
     api_key:str="EMPTY",
@@ -385,84 +355,20 @@ def message_and_history_v3(
     output_status=f"<i>tokens:{tokens} api status: {output_status} took {took:.2f}s</i>"
     return chatbot, output_messages, output_status    
 
-
-## Converting HTML to Markdown
-# pandoc --to=plain --from=html --output=files/linkedin.txt files/linkedin.html
-# Image to Base 64 Converter
 def image_to_base64(image_path):
     with open(image_path, 'rb') as img:
         encoded_string = base64.b64encode(img.read())
     return encoded_string.decode('utf-8')
 
-# def segment_text(text: str, pattern: str) -> T.Iterator[tuple[str, str]]:
-#     import re
-#     """Segment the text in title and content pair by pattern."""
-#     splits = re.split(pattern, text, flags=re.MULTILINE)
-#     pairs = zip(splits[1::2], splits[2::2])
-#     return pairs
 
-# segments_h1 = segment_text(text=text, pattern=r"^# (.+)")
-# segments_h2 = segment_text(text=h1_text, pattern=r"^## (.+)")
+# if __name__=="__main__":
+#     #client = Client(host=API_HOST)
+#     client = Client(host='http://192.168.0.18:12345')
+#     models = client.list()
+#     model_names=[]
+#     for model in models["models"]:
+#         model_names.append(model['name'])
 
-# def import_file(
-#     file: T.TextIO,
-#     collection: lib.Collection,
-#     encoding_function: T.Callable,
-#     max_output_tokens: int = lib.ENCODING_OUTPUT_LIMIT,
-# ):
-#     """Import a markdown file to a database collection."""
-#     text = file.read()
-#     filename = file.name
-#     segments_h1 = segment_text(text=text, pattern=r"^# (.+)")
-#     for h1, h1_text in segments_h1:
-#         segments_h2 = segment_text(text=h1_text, pattern=r"^## (.+)")
-#         for h2, content in segments_h2:
-#             id_ = f"{filename} # {h1} ## {h2}"  # unique doc id
-#             document = f"# {h1}\n\n## {h2}\n\n{content.strip()}"
-#             metadata = {"filename": filename, "h1": h1, "h2": h2}
-#             collection.add(ids=id_, documents=document, metadatas=metadata)
+#     print(model_names)
+#     # asclient = AsyncClient(host='http://192.168.0.18:12345')
 
-# PROMPT_CONTEXT = """
-# You are Fmind Chatbot, specialized in providing information regarding Médéric Hurier's (known as Fmind) professional background.
-# Médéric is an MLOps engineer based in Luxembourg. He is currently working at Decathlon. His calendar is booked until the conclusion of 2024.
-# Your responses should be succinct and maintain a professional tone. If inquiries deviate from Médéric's professional sphere, courteously decline to engage.
-
-# You may find more information about Médéric below (markdown format):
-# """
-
-# def answer(message: str, history: list[str]) -> str:
-#     """Answer questions about my resume."""
-#     # counters
-#     n_tokens = 0
-#     # messages
-#     messages = []
-#     # - context
-#     n_tokens += len(ENCODING(PROMPT_CONTEXT))
-#     messages += [{"role": "system", "content": PROMPT_CONTEXT}]
-#     # - history
-#     for user_content, assistant_content in history:
-#         n_tokens += len(ENCODING(user_content))
-#         n_tokens += len(ENCODING(assistant_content))
-#         messages += [{"role": "user", "content": user_content}]
-#         messages += [{"role": "assistant", "content": assistant_content}]
-#     # - message
-#     n_tokens += len(ENCODING(message))
-#     messages += [{"role": "user", "content": message}]
-#     # database
-#     results = COLLECTION.query(query_texts=message, n_results=QUERY_N_RESULTS)
-#     distances, documents = results["distances"][0], results["documents"][0]
-#     for distance, document in zip(distances, documents):
-#         # - distance
-#         if distance > QUERY_MAX_DISTANCE:
-#             break
-#         # - document
-#         n_document_tokens = len(ENCODING(document))
-#         if (n_tokens + n_document_tokens) >= PROMPT_MAX_TOKENS:
-#             break
-#         n_tokens += n_document_tokens
-#         messages[0]["content"] += document
-#     # response
-#     api_response = MODEL(messages=messages)
-#     content = api_response["choices"][0]["message"]["content"]
-#     # return
-#     return content
