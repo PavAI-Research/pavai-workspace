@@ -20,6 +20,18 @@ Hope to assist you locally in handling certain situations by providing you with 
 4. Real-time speech-to-speech translation
 5. Customize chatbot assistant persona type and response style 
 
+<summary><b>Hardware Requirements</b></summary>
+```
+CPU: 6+ cores
+Memory: 32+ GB if you plan to run real-time translation with limited GPU vram
+Harddrive: 60+ GB if you plan to download and run all models locally
+GPU: 8+ GB if you plan to run all models in GPU as fast as possible
+Operating System: only tested in linux so far
+```
+Note: Very limited testing on other hardware and os due resource constraint
+
+</details>
+
 ## Quick Start
 When running locally, it's recommend to have at least a GPU with 8 or more VRAM
 and 16 GB plus memory.
