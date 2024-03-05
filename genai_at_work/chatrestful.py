@@ -1,28 +1,12 @@
-# fastapi==0.92.0
-# gradio==3.19.1
-# httpx==0.23.3
-# loguru==0.6.0
-# numpy==1.24.2
-# pydantic==1.10.5
-# python-dotenv==1.0.0
-# PyYAML==6.0
-# requests==2.28.2
-# six==1.16.0
-# uvicorn==0.20.0
-# async_timeout
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 import gradio as gr
-
 import asyncio, httpx
 import async_timeout
-
 from loguru import logger
 from typing import Optional, List
 from pydantic import BaseModel
-
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
 API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -77,3 +61,19 @@ async def predict(input, history):
     history.append({"role": "assistant", "content": response})
     messages = [(history[i]["content"], history[i+1]["content"]) for i in range(0, len(history)-1, 2)]
     return messages, history
+
+
+###
+# fastapi==0.92.0
+# gradio==3.19.1
+# httpx==0.23.3
+# loguru==0.6.0
+# numpy==1.24.2
+# pydantic==1.10.5
+# python-dotenv==1.0.0
+# PyYAML==6.0
+# requests==2.28.2
+# six==1.16.0
+# uvicorn==0.20.0
+# async_timeout
+##

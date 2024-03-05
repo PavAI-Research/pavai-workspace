@@ -1,10 +1,5 @@
-#!pip install textsum
-#!pip install clean-text
-#!pip install python-doctr
-# tf2onnx
-#!pip install pyspellchecker
-#!pip install textsum
-#!pip install pytorch
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 import torch
 import logging

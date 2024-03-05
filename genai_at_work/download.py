@@ -1,10 +1,5 @@
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 from huggingface_hub import hf_hub_url
 from huggingface_hub import hf_hub_download
@@ -12,7 +7,7 @@ from huggingface_hub import snapshot_download
 import time
 from rich.progress import Progress
 
-HF_CACHE_DIR=config["HF_CACHE_DIR"] #"resources/models"
+HF_CACHE_DIR=config.config["HF_CACHE_DIR"] #"resources/models"
 
 def check_and_get_downloads():
     t0 = time.perf_counter()
@@ -21,27 +16,27 @@ def check_and_get_downloads():
 
         ## Download a single file
         print("MULTIMODAL")
-        model_file=hf_hub_download(repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
-        project_file=hf_hub_download(repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
+        model_file=hf_hub_download(repo_id=config.config["LOCAL_MM_REPO_ID"], filename=config.config["LOCAL_MM_REPO_MODEL_FILE"],cache_dir=HF_CACHE_DIR)
+        project_file=hf_hub_download(repo_id=config.config["LOCAL_MM_REPO_ID"], filename=config.config["LOCAL_MM_REPO_PROJECT_FILE"],cache_dir=HF_CACHE_DIR)
         print(model_file)
         print(project_file)
         progress.update(task1, advance=40)
 
-        # snapshot_download(repo_id=config["FASTER_WHISPER"],  cache_dir=HF_CACHE_DIR)
+        # snapshot_download(repo_id=config.config["FASTER_WHISPER"],  cache_dir=HF_CACHE_DIR)
         print("FASTER_WHISPER")
-        faster_file=snapshot_download(repo_id=config["FASTER_WHISPER"],  cache_dir=HF_CACHE_DIR)
+        faster_file=snapshot_download(repo_id=config.config["FASTER_WHISPER"],  cache_dir=HF_CACHE_DIR)
         print(faster_file)
         progress.update(task1, advance=20)
 
         print("DISTIL_WHISPER")
-        distil_file=snapshot_download(repo_id=config["DISTIL_WHISPER"],  cache_dir=HF_CACHE_DIR)
+        distil_file=snapshot_download(repo_id=config.config["DISTIL_WHISPER"],  cache_dir=HF_CACHE_DIR)
         print(distil_file)
         progress.update(task1, advance=20)    
 
         ##  Download repository and save locally
-        if not eval(config["SKIP_LANG_TRANSLATOR"]):
+        if not eval(config.config["SKIP_LANG_TRANSLATOR"]):
             print("Download LANG_TRANSLATOR")
-            lang_file=snapshot_download(repo_id=config["LANG_TRANSLATOR"],  cache_dir=HF_CACHE_DIR)
+            lang_file=snapshot_download(repo_id=config.config["LANG_TRANSLATOR"],  cache_dir=HF_CACHE_DIR)
             print(lang_file)
             progress.update(task1, advance=20)
         else:

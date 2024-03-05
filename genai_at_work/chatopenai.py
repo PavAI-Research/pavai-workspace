@@ -1,12 +1,6 @@
-# pip install openai
-# pip install gradio
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
+
 import time
 import base64
 import json
@@ -27,9 +21,9 @@ pretty.install()
 # Streaming endpoint
 #API_HOST = "http://192.168.0.18:12345"
 #API_HOST = "http://192.168.0.29:8004"
-LLM_PROVIDER=config["LLM_PROVIDER"]
+LLM_PROVIDER=config.config["LLM_PROVIDER"]
 
-API_HOST=config["OPENAI_API_HOST"]
+API_HOST=config.config["OPENAI_API_HOST"]
 API_URL_BASE = f"{API_HOST}/v1"
 API_URL_CHAT = f"{API_URL_BASE}/chat/completions"
 

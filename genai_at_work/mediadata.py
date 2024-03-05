@@ -1,34 +1,13 @@
-## INSTALLATION ##
-# pip install pydub
-# pip install faster_whisper 
-# !pip install -q --upgrade torch torchvision torchaudio
-# !pip install -q git+https://github.com/huggingface/transformers
-# !pip install -q accelerate optimum
-# pip install pytube
-# pip install youtube-transcript-api
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
-import os 
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
-import logging
-from rich.logging import RichHandler
-from rich import pretty
-logging.basicConfig(level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)])
-logger = logging.getLogger(__name__)
-pretty.install()
-import warnings 
-warnings.filterwarnings("ignore")
 import traceback
 import time 
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import torch
+import os
 
-
-HF_CACHE_DIR=config["HF_CACHE_DIR"] #"resources/models"
+HF_CACHE_DIR=config.config["HF_CACHE_DIR"] #"resources/models"
 print("hf_cache_dir: ", HF_CACHE_DIR)
 
 def distil_whisper(filepath:str,chatbot:list=[],history:list=[], 
@@ -52,10 +31,10 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
             use_safetensors=True,
             temperature=temperature,
             do_sample=do_sample,
-            cache_dir=config["HF_CACHE_DIR"]
+            cache_dir=config.config["HF_CACHE_DIR"]
         )
         model.to(device)
-        processor = AutoProcessor.from_pretrained(model_id, cache_dir=config["HF_CACHE_DIR"])
+        processor = AutoProcessor.from_pretrained(model_id, cache_dir=config.config["HF_CACHE_DIR"])
         pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -77,7 +56,7 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
                 use_safetensors=True,
                 temperature=temperature,
                 do_sample=do_sample ,
-                cache_dir=config["HF_CACHE_DIR"]               
+                cache_dir=config.config["HF_CACHE_DIR"]               
             )
             model.to(device)
             processor = AutoProcessor.from_pretrained(model_id)
@@ -89,7 +68,7 @@ def distil_whisper(filepath:str,chatbot:list=[],history:list=[],
                 max_new_tokens=128,
                 torch_dtype=torch_dtype,
                 device=device,
-                cache_dir=config["HF_CACHE_DIR"]
+                cache_dir=config.config["HF_CACHE_DIR"]
             )    
             result = pipe(filepath)
     # update chatbot
@@ -113,7 +92,7 @@ def faster_whisper(filepath:str,chatbot:list=[],history:list=[],
                      compute_type:str="default",                     
                      timeline:bool=False, 
                      beam_size:int=6,
-                     download_root:str=config["HF_CACHE_DIR"],
+                     download_root:str=config.config["HF_CACHE_DIR"],
                      local_files_only:bool=False):
     
     from faster_whisper import WhisperModel
@@ -180,7 +159,7 @@ def transcribe_video(filepath:str,chatbot:list=[],history:list=[],
 def youtube_download(url:str,local_storage:str="./workspace/downloads"):
     from pytube import YouTube    
     import time    
-    if os.path.exists(local_storage):
+    if not os.path.exists(local_storage):
         os.mkdir(local_storage)
     t0 = time.perf_counter()     
     local_file = None   

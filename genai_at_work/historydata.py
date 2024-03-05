@@ -1,22 +1,7 @@
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
-import logging
-import warnings 
-from rich.logging import RichHandler
-from rich import print,pretty
-logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)])
-logger = logging.getLogger(__name__)
-pretty.install()
-warnings.filterwarnings("ignore")
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 ### keep dataset history ###
-# pip install chromadb
-# pip install sentence_transformers
 import time
 import chromadb
 from chromadb.utils import embedding_functions
@@ -27,7 +12,7 @@ sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFuncti
     model_name="BAAI/bge-base-en-v1.5"
 ) ## 768
 
-historydb=config["HISTORY_DB"]  ## "resources/historydb"
+historydb=config.config["HISTORY_DB"]  ## "resources/historydb"
 settings = Settings(allow_reset=True)
 client = chromadb.PersistentClient(path=historydb,settings=settings)
 
@@ -77,7 +62,7 @@ def reset():
     global client
     """# Empties and completely resets the database. ⚠️ This is destructive and not reversible."""
     client.reset()
-    historydb=config["HISTORY_DB"]  ## "resources/historydb"    
+    historydb=config.config["HISTORY_DB"]  ## "resources/historydb"    
     settings = Settings(allow_reset=True)
     client = chromadb.PersistentClient(path=historydb,settings=settings)    
 

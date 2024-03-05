@@ -1,30 +1,6 @@
-### Web Data Loader ###
-# WebBaseLoader
-# SeleniumURLLoader,
-# NewsURLLoader
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
-#!pip install langchain openai unstructured selenium newspaper3k textstat tiktoken faiss-cpu
-# pip install selenium
-# pip install unstructured
-# pip install -U langchain-community
-# pip install newspaper3k
-# pip install selenium
-# pip install webdriver-manager
-# pip install duckduckgo-search==4.1.1
-
-# import filedata
-# from langchain.document_loaders import (WebBaseLoader, UnstructuredURLLoader, 
-#                                         NewsURLLoader, SeleniumURLLoader)
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-# https://newspaper.readthedocs.io/en/latest/
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
 import tiktoken
 
 def num_tokens_from_string(string: str) -> int:

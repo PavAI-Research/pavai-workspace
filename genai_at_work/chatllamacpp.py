@@ -1,8 +1,7 @@
-# tested on llamacpp version==0.2.27
-# CMAKE_ARGS="-DLLAMA_CUBLAS=on" poetry run pip install llama-cpp-python==0.2.27 --force-reinstall --no-cache-dir
-import sys
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
+
 import datetime
-import asyncio
 import random
 import requests
 from termcolor import colored
@@ -13,6 +12,8 @@ from rich.logging import RichHandler
 from pydantic import Field
 import tiktoken
 from openai import OpenAI
+import sys
+import asyncio
 from transformers import AutoTokenizer
 from collections.abc import Iterator, AsyncIterator
 from typing import Any, List, Union, Optional, Sequence, Mapping, Literal, Dict
@@ -20,45 +21,12 @@ from rich import pretty
 from huggingface_hub import hf_hub_download
 from functionary.prompt_template import get_prompt_template_from_tokenizer
 from chatlab import FunctionRegistry, tool_result
+import system_types as system_types
+import yahoo_finance as yf
 import os
 import traceback
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
-pretty.install()
-logging.basicConfig(level=logging.INFO, format="%(message)s",
-                    datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)])
-logger = logging.getLogger(__name__)
 
-### Singleton Class ###
-
-
-class MetaSingleton(type):
-    """
-    Metaclass for implementing the Singleton pattern.
-    """
-    _instances: Dict[type, Any] = {}
-
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
-        if cls not in cls._instances:
-            cls._instances[cls] = super(
-                MetaSingleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class Singleton(object, metaclass=MetaSingleton):
-    """
-    Base class for implementing the Singleton pattern.
-    """
-
-    def __init__(self):
-        super(Singleton, self).__init__()
-
-
-max_allow_context = config["MODEL_CONTEXT_SIZE"]
+max_allow_context = config.config["MODEL_CONTEXT_SIZE"]
 
 LLM_OPTIONS = {
     "n_ctx": 7360,
@@ -103,7 +71,7 @@ CHAT_OPTIONS = {
     "max_tokens": 256
 }
 
-HF_CACHE_DIR = config["HF_CACHE_DIR"]  # "resources/models"
+HF_CACHE_DIR = config.config["HF_CACHE_DIR"]  # "resources/models"
 
 ##
 # Functions
@@ -159,14 +127,12 @@ def get_current_weather(
     }
 
 
-class LlamaCppLocal(Singleton):
+class LlamaCppLocal(system_types.Singleton):
 
     def __init__(self, options: dict = None):
         """constructor"""
         self.options = options
         self.download_models()
-        # So we will use tokenizer from HuggingFace
-        # self.tokenizer = AutoTokenizer.from_pretrained(model_repo, legacy=True, cache_dir=cache_dir)
         # registry
         self.registry = FunctionRegistry()
         # name to function mappping
@@ -188,9 +154,9 @@ class LlamaCppLocal(Singleton):
     def download_multimodal_model(self):
         # Download a single file
         self.model_file = hf_hub_download(
-            repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
+            repo_id=config.config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
         self.project_file = hf_hub_download(
-            repo_id=config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_PROJECT_FILE"], cache_dir=HF_CACHE_DIR)
+            repo_id=config.config["LOCAL_MM_REPO_ID"], filename=config["LOCAL_MM_REPO_PROJECT_FILE"], cache_dir=HF_CACHE_DIR)
         print("downloaded model file: ", self.model_file)
         print("downloaded project file: ", self.project_file)
         return self.model_file, self.project_file
@@ -199,7 +165,7 @@ class LlamaCppLocal(Singleton):
         from llama_cpp import Llama
         self.model_file = self.download_default_model()
         options = LLM_OPTIONS
-        chat_format = config["LOCAL_DEFAULT_REPO_CHAT_FORMAT"]
+        chat_format = config.config["LOCAL_DEFAULT_REPO_CHAT_FORMAT"]
         if chat_format is not None:
             options["chat_format"] = chat_format
         options["tokenizer"] = None
@@ -210,14 +176,14 @@ class LlamaCppLocal(Singleton):
     def download_default_model(self):
         # Download a single file
         model_file = hf_hub_download(
-            repo_id=config["LOCAL_DEFAULT_REPO_ID"], filename=config["LOCAL_DEFAULT_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
+            repo_id=config.config["LOCAL_DEFAULT_REPO_ID"], filename=config["LOCAL_DEFAULT_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
         print("downloaded model file: ", model_file)
         return model_file
 
     def download_functionary_model(self):
         # Download a single file
         model_file = hf_hub_download(
-            repo_id=config["LOCAL_FUN_REPO_ID"], filename=config["LOCAL_FUN_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
+            repo_id=config.config["LOCAL_FUN_REPO_ID"], filename=config["LOCAL_FUN_REPO_MODEL_FILE"], cache_dir=HF_CACHE_DIR)
         print("downloaded functionary model file: ", model_file)
         return model_file
 
@@ -240,16 +206,16 @@ class LlamaCppLocal(Singleton):
         from llama_cpp import Llama
         from transformers import AutoTokenizer
         logger.warn("switch model functionary")
-        cache_dir = config["HF_CACHE_DIR"]
-        repo_id = config["LOCAL_FUN_REPO_ID"]
-        filename = config["LOCAL_FUN_REPO_MODEL_FILE"]
-        chat_format = config["LOCAL_FUN_REPO_CHAT_FORMAT"]
+        cache_dir = config.config["HF_CACHE_DIR"]
+        repo_id = config.config["LOCAL_FUN_REPO_ID"]
+        filename = config.config["LOCAL_FUN_REPO_MODEL_FILE"]
+        chat_format = config.config["LOCAL_FUN_REPO_CHAT_FORMAT"]
         # self.tokenizer=LlamaHFTokenizer.from_pretrained(repo_id)
         self.download_functionary_model()
         self.tokenizer = AutoTokenizer.from_pretrained(
             repo_id, legacy=True, cache_dir=cache_dir)
         if cache_dir is None:
-            cache_dir = config["HF_CACHE_DIR"]
+            cache_dir = config.config["HF_CACHE_DIR"]
         if chat_format is not None:
             options["chat_format"] = chat_format
         self.llm = Llama(model_path=self.model_file, **options)
@@ -260,10 +226,10 @@ class LlamaCppLocal(Singleton):
         from llama_cpp import Llama
         from transformers import AutoTokenizer
         logger.warn("switch model functionary")
-        cache_dir = config["HF_CACHE_DIR"]
-        repo_id = config["LOCAL_FUN_REPO_ID"]
-        filename = config["LOCAL_FUN_REPO_MODEL_FILE"]
-        chat_format = config["LOCAL_FUN_REPO_CHAT_FORMAT"]
+        cache_dir = config.config["HF_CACHE_DIR"]
+        repo_id = config.config["LOCAL_FUN_REPO_ID"]
+        filename = config.config["LOCAL_FUN_REPO_MODEL_FILE"]
+        chat_format = config.config["LOCAL_FUN_REPO_CHAT_FORMAT"]
         # self.tokenizer=LlamaHFTokenizer.from_pretrained(repo_id)
         self.tokenizer = AutoTokenizer.from_pretrained(
             repo_id, legacy=True, cache_dir=cache_dir)
@@ -283,7 +249,7 @@ class LlamaCppLocal(Singleton):
         self.llm = None
         self._release_model()
         logger.warn("switch model multimodal")
-        # chat_format = config["LOCAL_MM_REPO_CHAT_FORMAT"]
+        # chat_format = config.config["LOCAL_MM_REPO_CHAT_FORMAT"]
         self.download_multimodal_model()
         options = LAVA_OPTIONS
         chat_handler = Llava15ChatHandler(clip_model_path=self.project_file)
@@ -465,7 +431,7 @@ class LlamaCppLocal(Singleton):
     def switch_model_dynamic(self, repo_id: str = None, filename: str = None, chat_format: str = None, tokenizer=None, cache_dir: str = None, options: dict = None):
         from llama_cpp import Llama
         if cache_dir is None:
-            cache_dir = config["HF_CACHE_DIR"]
+            cache_dir = config.config["HF_CACHE_DIR"]
         if chat_format is not None:
             options["chat_format"] = chat_format
         if tokenizer is not None:
@@ -732,7 +698,7 @@ class LlamaCppLocal(Singleton):
         output_messages = history
         try:
             conversation_tokens = self.count_messages_token(history)
-            max_allow_context = config["MODEL_CONTEXT_SIZE"]
+            max_allow_context = config.config["MODEL_CONTEXT_SIZE"]
             if int(conversation_tokens) > int(max_allow_context):
                 logger.warn(
                     "current conversation tokens exceed context window allow.")
@@ -790,9 +756,9 @@ class LlamaCppLocal(Singleton):
 
     def list_models(self):
         modelnames = []
-        modelnames.append(config["LOCAL_MM_REPO_ID"])
-        modelnames.append(config["LOCAL_DEFAULT_REPO_ID"])
-        modelnames.append(config["LOCAL_FUN_REPO"])
+        modelnames.append(config.config["LOCAL_MM_REPO_ID"])
+        modelnames.append(config.config["LOCAL_DEFAULT_REPO_ID"])
+        modelnames.append(config.config["LOCAL_FUN_REPO"])
         return modelnames
 
     def _test_function_call(self):

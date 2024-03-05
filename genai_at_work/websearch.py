@@ -1,12 +1,6 @@
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
-# pip install crewai langchain-community langchain-openai requests duckduckgo-search chromadb
 import crewai
 import langchain.tools as langchain_tools 
 from langchain_openai import ChatOpenAI
@@ -30,24 +24,24 @@ from newspaper import fulltext
 import traceback
 
 ## embedding for vectordb 
-embedding_function = HuggingFaceEmbeddings(model_name=config["NEWSCREW_EMBEDDING"])
-query_embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=config["NEWSCREW_EMBEDDING"]) 
+embedding_function = HuggingFaceEmbeddings(model_name=config.config["NEWSCREW_EMBEDDING"])
+query_embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=config.config["NEWSCREW_EMBEDDING"]) 
 ## 768
-if config["NEWSCREW_LLM_PROVIDER"]=="ollama":
+if config.config["NEWSCREW_LLM_PROVIDER"]=="ollama":
     #base_url="http://192.168.0.18:12345"
     #model="openhermes"
-    llm = Ollama(model=config["OLLAMA_NEWSCREW_LLM_MODEL_NAME"],base_url=config["OLLAMA_NEWSCREW_LLM_BASE_URL"])
+    llm = Ollama(model=config.config["OLLAMA_NEWSCREW_LLM_MODEL_NAME"],base_url=config.config["OLLAMA_NEWSCREW_LLM_BASE_URL"])
 else:
     # LLAMACPP
     os.environ["OPENAI_API_KEY"] = "EMPTY"
-    os.environ["OPENAI_API_BASE"] = config["OPENAI_NEWSCREW_LLM_BASE_URL"]
-    os.environ["MODEL_NAME"] = config["OPENAI_NEWSCREW_LLM_MODEL_NAME"]
-    llm = ChatOpenAI(model_name=config["OPENAI_NEWSCREW_LLM_MODEL_NAME"], temperature=0.7)
+    os.environ["OPENAI_API_BASE"] = config.config["OPENAI_NEWSCREW_LLM_BASE_URL"]
+    os.environ["MODEL_NAME"] = config.config["OPENAI_NEWSCREW_LLM_MODEL_NAME"]
+    llm = ChatOpenAI(model_name=config.config["OPENAI_NEWSCREW_LLM_MODEL_NAME"], temperature=0.7)
     ## embedding_function = OpenAIEmbeddings()
 
 # Tool 1 : Save the news articles in a database
-NEWS_SEARCH_DB=config["NEWS_SEARCH_DB"]
-CREWAI_JOB_DB=config["CREWAI_JOB_DB"]
+NEWS_SEARCH_DB=config.config["NEWS_SEARCH_DB"]
+CREWAI_JOB_DB=config.config["CREWAI_JOB_DB"]
 
 # Tool 1 : Search API for news articles on the web
 search_tool = DuckDuckGoSearchRun()

@@ -1,10 +1,5 @@
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 import gradio as gr
 import pandas as pd
@@ -286,12 +281,12 @@ class ChatbotWorkspace:
         return chatbot, history
 
     def get_api_host(self):
-        if config["LLM_PROVIDER"]=="all-in-one":
-            return config["LLM_PROVIDER"]                   
-        elif config["LLM_PROVIDER"]=="ollama":
-            return config["OLLAMA_API_HOST"]
-        elif config["LLM_PROVIDER"]=="openai":    
-            return config["OPENAI_API_HOST"]           
+        if config.config["LLM_PROVIDER"]=="all-in-one":
+            return config.config["LLM_PROVIDER"]                   
+        elif config.config["LLM_PROVIDER"]=="ollama":
+            return config.config["OLLAMA_API_HOST"]
+        elif config.config["LLM_PROVIDER"]=="openai":    
+            return config.config["OPENAI_API_HOST"]           
         else:
             return "Missing, configuration error!"
 

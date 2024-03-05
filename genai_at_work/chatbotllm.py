@@ -1,15 +1,10 @@
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
+
+import gradio as gr
 import chatllamacpp
 import chatollama
 import chatopenai
-import gradio as gr
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
-
 
 def api_calling_v2(
     api_host: str = None,
@@ -25,7 +20,7 @@ def api_calling_v2(
     presence_penalty: int = 0,
     frequency_penalty: int = 0
 ):
-    provider = config["LLM_PROVIDER"]
+    provider = config.config["LLM_PROVIDER"]
     match provider:
         case "all-in-one":
             # llamacpp local
@@ -95,7 +90,7 @@ def message_and_history_v2(
     presence_penalty: int = 0,
     frequency_penalty: int = 0,
 ):
-    provider = config["LLM_PROVIDER"]
+    provider = config.config["LLM_PROVIDER"]
     match provider:
         case "all-in-one":
             # llamacpp local
@@ -151,7 +146,7 @@ def message_and_history_v2(
 
 
 def list_models():
-    provider = config["LLM_PROVIDER"]
+    provider = config.config["LLM_PROVIDER"]
     match provider:
         case "all-in-one":
             # llamacpp local
@@ -175,7 +170,7 @@ def upload_image(
         chatbot: list = None,
         history: list = None,
         system_prompt: list = None):
-    provider = config["LLM_PROVIDER"]
+    provider = config.config["LLM_PROVIDER"]
     match provider:
         case "all-in-one":
             # llamacpp local

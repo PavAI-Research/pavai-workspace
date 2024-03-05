@@ -1,12 +1,6 @@
-# pip install ollama
-# pip install gradio
-import os
-from dotenv import dotenv_values
-config = {
-    **dotenv_values("env.shared"),  # load shared development variables
-    **dotenv_values("env.secret"),  # load sensitive variables
-    **os.environ,  # override loaded values with environment variables
-}
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
+
 import base64
 import time
 import random
@@ -20,11 +14,9 @@ from ollama._types import Message, Options, RequestError, ResponseError
 from typing import Any, AnyStr, Union, Optional, Sequence, Mapping, Literal
 import tiktoken
 
-#openai.api_key = "YOUR_API_KEY"
-#prompt = "Enter Your Query Here"
-LLM_PROVIDER=config["LLM_PROVIDER"]
+LLM_PROVIDER=config.config["LLM_PROVIDER"]
 
-API_HOST=config["OLLAMA_API_HOST"]
+API_HOST=config.config["OLLAMA_API_HOST"]
 client = Client(host=API_HOST)
 asclient = AsyncClient(host=API_HOST)
 

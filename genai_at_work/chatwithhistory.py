@@ -1,23 +1,8 @@
-# !pip install langchain
-# !pip install langchain-community
-# !pip install langchain-openai
-# !pip install langchain-community=="0.0.10"
-# !pip install langchain-core=="0.1.8"
-# !pip install openai=="1.7.0"
-# !pip install unstructured=="0.10.25"
-# !pip install crewai=="0.1.24"
-# !pip install pyowm=='3.3.0'
-# !pip install tools=="^0.1.9"
-# !pip install wikipedia=="1.4.0"
-# !pip install yfinance=="0.2.35"
-# !pip install sec-api=="1.0.17"
-# !pip install tiktoken=="0.5.2"
-# !pip install faiss-cpu=="1.7.4"
-# !pip install python-dotenv=="1.0.0"
-# Chat with history data
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
+
 import os
 import argparse
-
 from tqdm import tqdm
 import chromadb
 import argparse
@@ -32,14 +17,13 @@ from chromadb.utils import embedding_functions
 import json
 from openai import OpenAI
 
-
-#llmclient = OpenAI(base_url="http://192.168.0.29:8004/v1", api_key="sk-1234")
 llmclient = OpenAI(base_url="http://192.168.0.18:12345/v1", api_key="sk-1234")
 # LLAMACPP 
 os.environ["OPENAI_API_KEY"] = "EMPTY"
 os.environ["OPENAI_API_BASE"] = "http://192.168.0.29:8004/v1"
 os.environ["MODEL_NAME"] = "openhermes-2.5-mistral-7b"
 
+#llmclient = OpenAI(base_url="http://192.168.0.29:8004/v1", api_key="sk-1234")
 #llamacpp_llm=ChatOpenAI(model_name="mistral-7b-instruct-v0.2", temperature=0.7)
 #ollama_llm = Ollama(model="openhermes",base_url="http://192.168.0.18:12345")
 

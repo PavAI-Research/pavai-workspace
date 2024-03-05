@@ -1,3 +1,5 @@
+from genai_at_work import config, logutil
+logger = logutil.logging.getLogger(__name__)
 
 import gradio as gr
 import pandas as pd
