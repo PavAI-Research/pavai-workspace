@@ -57,6 +57,18 @@ CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 poetry run pip install llama-cpp-py
 Follow keep it simple principle.
 - ![workspace-1](./resources/images/pavai_seamless_workspace_design.png) Models.
 
+## Screenshots
+
+- ![workspace-1](./resources/images/screenshots/pavai_seamless_workspace_plastic_in_ocean_websearch.png) Web Search.
+
+- ![workspace-1](./resources/images/screenshots/pavai_seamless_workspace_plastic_in_ocean_ecoGPT.png) Ocean Plastic.
+
+- ![workspace-1](./resources/images/screenshots/pavai_seamless_workspace_plastic_in_video_transcript_summarizer.png) Long-text summarizer
+
+- ![workspace-1](./resources/images/screenshots/pavai_seamless_workspace_plastic_in_speech_translation.png) Long-text summarizer
+
+- ![workspace-1](./resources/images/screenshots/pavai_seamless_workspace_plastic_in_news_research.png) Long-text summarizer
+
 
 ## Acknowledgments
 many thanks to these projects for their inspiration and help, they including llamacpp-python,whisper,fasterwhisper, ollama, styledstts2, piper, vad and meta seamless communication. 
